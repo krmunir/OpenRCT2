@@ -9,34 +9,34 @@
 
 #if defined(__APPLE__) && defined(__MACH__)
 
-#import <Cocoa/Cocoa.h>
+#include "UiContext.h"
 
-#include <mach-o/dyld.h>
+#import <Cocoa/Cocoa.h>
+#include <SDL.h>
 #include <dlfcn.h>
+#include <mach-o/dyld.h>
 #include <openrct2/common.h>
 #include <openrct2/core/String.hpp>
 #include <openrct2/ui/UiContext.h>
-#include "UiContext.h"
-
-#include <SDL.h>
 
 namespace OpenRCT2::Ui
 {
     class macOSContext final : public IPlatformUiContext
     {
     private:
-
     public:
         macOSContext()
         {
-            @autoreleasepool {
-                if ([NSWindow respondsToSelector:@selector(setAllowsAutomaticWindowTabbing:)]) {
+            @autoreleasepool
+            {
+                if ([NSWindow respondsToSelector:@selector(setAllowsAutomaticWindowTabbing:)])
+                {
                     [NSWindow setAllowsAutomaticWindowTabbing:NO];
                 }
             }
         }
 
-        void SetWindowIcon(SDL_Window * window) override
+        void SetWindowIcon(SDL_Window* window) override
         {
         }
 
@@ -46,49 +46,53 @@ namespace OpenRCT2::Ui
             return false;
         }
 
-        void ShowMessageBox(SDL_Window * window, const std::string &message) override
+        void ShowMessageBox(SDL_Window* window, const std::string& message) override
         {
             @autoreleasepool
             {
-                NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+                NSAlert* alert = [[[NSAlert alloc] init] autorelease];
                 [alert addButtonWithTitle:@"OK"];
                 alert.messageText = [NSString stringWithUTF8String:message.c_str()];
                 [alert runModal];
             }
         }
 
-        std::string ShowFileDialog(SDL_Window * window, const FileDialogDesc &desc) override
+        std::string ShowFileDialog(SDL_Window* window, const FileDialogDesc& desc) override
         {
             @autoreleasepool
             {
-                NSMutableArray *extensions = [NSMutableArray new];
-                for (const OpenRCT2::Ui::FileDialogDesc::Filter &filter: desc.Filters) {
-                    if (filter.Pattern != "") {
-                        NSString *fp = [NSString stringWithUTF8String:filter.Pattern.c_str()];
+                NSMutableArray* extensions = [NSMutableArray new];
+                for (const OpenRCT2::Ui::FileDialogDesc::Filter& filter : desc.Filters)
+                {
+                    if (filter.Pattern != "")
+                    {
+                        NSString* fp = [NSString stringWithUTF8String:filter.Pattern.c_str()];
                         fp = [fp stringByReplacingOccurrencesOfString:@"*." withString:@""];
                         [extensions addObjectsFromArray:[fp componentsSeparatedByString:@";"]];
                     }
                 }
 
-                NSString *directory;
-                NSSavePanel *panel;
+                NSString* directory;
+                NSSavePanel* panel;
                 if (desc.Type == FILE_DIALOG_TYPE::SAVE)
                 {
-                    NSString *filePath = [NSString stringWithUTF8String:desc.DefaultFilename.c_str()];
+                    NSString* filePath = [NSString stringWithUTF8String:desc.DefaultFilename.c_str()];
                     directory = filePath.stringByDeletingLastPathComponent;
-                    NSString *basename = filePath.lastPathComponent;
+                    NSString* basename = filePath.lastPathComponent;
                     panel = [NSSavePanel savePanel];
                     panel.nameFieldStringValue = [NSString stringWithFormat:@"%@.%@", basename, extensions.firstObject];
                 }
                 else if (desc.Type == FILE_DIALOG_TYPE::OPEN)
                 {
                     directory = [NSString stringWithUTF8String:desc.InitialDirectory.c_str()];
-                    NSOpenPanel *open = [NSOpenPanel openPanel];
+                    NSOpenPanel* open = [NSOpenPanel openPanel];
                     open.canChooseDirectories = false;
                     open.canChooseFiles = true;
                     open.allowsMultipleSelection = false;
                     panel = open;
-                } else {
+                }
+                else
+                {
                     return std::string();
                 }
 
@@ -98,36 +102,40 @@ namespace OpenRCT2::Ui
                 if ([panel runModal] == NSModalResponseCancel)
                 {
                     return std::string();
-                } else {
+                }
+                else
+                {
                     return panel.URL.path.UTF8String;
                 }
             }
         }
 
-        std::string ShowDirectoryDialog(SDL_Window * window, const std::string &title) override
+        std::string ShowDirectoryDialog(SDL_Window* window, const std::string& title) override
         {
             @autoreleasepool
             {
-                NSOpenPanel *panel = [NSOpenPanel openPanel];
+                NSOpenPanel* panel = [NSOpenPanel openPanel];
                 panel.canChooseFiles = false;
                 panel.canChooseDirectories = true;
                 panel.allowsMultipleSelection = false;
                 if ([panel runModal] == NSModalResponseOK)
                 {
-                    NSString *selectedPath = panel.URL.path;
-                    const char *path = selectedPath.UTF8String;
+                    NSString* selectedPath = panel.URL.path;
+                    const char* path = selectedPath.UTF8String;
                     return path;
-                } else {
+                }
+                else
+                {
                     return "";
                 }
             }
         }
 
     private:
-        static int32_t Execute(const std::string &command, std::string * output = nullptr)
+        static int32_t Execute(const std::string& command, std::string* output = nullptr)
         {
             log_verbose("executing \"%s\"...\n", command.c_str());
-            FILE * fpipe = popen(command.c_str(), "r");
+            FILE* fpipe = popen(command.c_str(), "r");
             if (fpipe == nullptr)
             {
                 return -1;
@@ -171,7 +179,7 @@ namespace OpenRCT2::Ui
         }
     };
 
-    IPlatformUiContext * CreatePlatformUiContext()
+    IPlatformUiContext* CreatePlatformUiContext()
     {
         return new macOSContext();
     }

@@ -9,12 +9,12 @@
 
 #if defined(__APPLE__) && defined(__MACH__)
 
+#include "../OpenRCT2.h"
+#include "../core/Path.hpp"
+#include "Platform2.h"
+
 #include <Foundation/Foundation.h>
 #include <mach-o/dyld.h>
-
-#include "../core/Path.hpp"
-#include "../OpenRCT2.h"
-#include "Platform2.h"
 
 namespace Platform
 {
@@ -23,17 +23,17 @@ namespace Platform
         // macOS stores everything in ~/Library/Application Support/OpenRCT2
         switch (folder)
         {
-        case SPECIAL_FOLDER::USER_CACHE:
-        case SPECIAL_FOLDER::USER_CONFIG:
-        case SPECIAL_FOLDER::USER_DATA:
+            case SPECIAL_FOLDER::USER_CACHE:
+            case SPECIAL_FOLDER::USER_CONFIG:
+            case SPECIAL_FOLDER::USER_DATA:
             {
                 auto home = GetFolderPath(SPECIAL_FOLDER::USER_HOME);
                 return Path::Combine(home, "Library/Application Support");
             }
-        case SPECIAL_FOLDER::USER_HOME:
-            return GetHomePath();
-        default:
-            return std::string();
+            case SPECIAL_FOLDER::USER_HOME:
+                return GetHomePath();
+            default:
+                return std::string();
         }
     }
 
@@ -46,7 +46,7 @@ namespace Platform
     {
         @autoreleasepool
         {
-            NSBundle * bundle = [NSBundle mainBundle];
+            NSBundle* bundle = [NSBundle mainBundle];
             if (bundle)
             {
                 auto resources = bundle.resourcePath.UTF8String;
@@ -71,7 +71,7 @@ namespace Platform
             auto exePath = GetCurrentExecutablePath();
             auto exeDirectory = Path::GetDirectory(exePath);
             path = Path::Combine(exeDirectory, "data");
-            NSString * nsPath = [NSString stringWithUTF8String:path.c_str()];
+            NSString* nsPath = [NSString stringWithUTF8String:path.c_str()];
             if (![[NSFileManager defaultManager] fileExistsAtPath:nsPath])
             {
                 path = GetBundlePath();
