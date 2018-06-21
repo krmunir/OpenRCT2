@@ -13,6 +13,10 @@
 #include "../core/Path.hpp"
 #include "Platform2.h"
 
+// undefine `interface` and `abstract`, because it's causing conflicts with Objective-C's keywords
+#undef interface
+#undef abstract
+
 #include <Foundation/Foundation.h>
 #include <mach-o/dyld.h>
 

@@ -14,6 +14,10 @@
 #include "../util/Util.h"
 #include "platform.h"
 
+// undefine `interface` and `abstract`, because it's causing conflicts with Objective-C's keywords
+#undef interface
+#undef abstract
+
 #import <AppKit/AppKit.h>
 #import <Foundation/Foundation.h>
 #include <mach-o/dyld.h>

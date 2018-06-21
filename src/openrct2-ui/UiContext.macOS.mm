@@ -11,13 +11,18 @@
 
 #include "UiContext.h"
 
+#include <openrct2/common.h>
+#include <openrct2/core/String.hpp>
+#include <openrct2/ui/UiContext.h>
+
+// undefine `interface` and `abstract`, because it's causing conflicts with Objective-C's keywords
+#undef interface
+#undef abstract
+
 #import <Cocoa/Cocoa.h>
 #include <SDL.h>
 #include <dlfcn.h>
 #include <mach-o/dyld.h>
-#include <openrct2/common.h>
-#include <openrct2/core/String.hpp>
-#include <openrct2/ui/UiContext.h>
 
 namespace OpenRCT2::Ui
 {
